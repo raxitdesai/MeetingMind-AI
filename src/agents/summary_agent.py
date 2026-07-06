@@ -9,7 +9,7 @@ import logging
 from typing import Optional, Dict, Any
 
 from google.adk.sessions import InMemorySessionService
-from agents.base_agent import BaseAgent
+from src.agents.base_agent import BaseAgent
 
 logger = logging.getLogger("meetingmind.agents.summary")
 

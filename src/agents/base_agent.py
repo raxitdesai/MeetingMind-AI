@@ -10,7 +10,7 @@ import logging
 from typing import Optional, Dict, Any
 from google.adk import Agent, Runner
 from google.adk.sessions import InMemorySessionService
-from config import BASE_DIR
+from src.config import BASE_DIR
 
 logger = logging.getLogger("meetingmind.agents.base")
 
