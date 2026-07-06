@@ -1,97 +1,421 @@
 ---
 name: Meeting Summarization
-description: Summarizes meeting transcripts into structured JSON summaries containing objective, key discussions, decisions, risks, and next steps.
+description: Generate an accurate, structured summary from a meeting transcript. Produce concise, deterministic JSON output without hallucinations.
+version: 2.0
+author: MeetingMind AI
 ---
 
 # Meeting Summarization Skill
 
 ## Purpose
-This skill enables an AI agent to analyze a raw meeting transcript and produce a highly structured, concise, and accurate JSON summary. It captures the essential context of the meeting including the title, main summary, key decisions made, identified risks, and next steps.
 
-## Trigger
-- When a raw meeting transcript (text format) is provided.
-- When a user asks for a summary, key decisions, or general overview of a meeting transcript.
+This skill enables an AI agent to analyze a meeting transcript and produce a structured summary that accurately captures the meeting objective, discussions, decisions, risks, and next steps.
 
-## Inputs
-- `transcript` (string): The raw text transcript of the meeting, typically containing speaker names and timestamps.
+The skill prioritizes factual accuracy, deterministic outputs, and structured JSON suitable for downstream AI agents.
 
-## Outputs
-A JSON object adhering to the following schema:
+---
+
+# Trigger
+
+Use this skill whenever:
+
+- A meeting transcript is uploaded.
+- A meeting needs summarization.
+- Another agent requests a meeting summary.
+
+Do NOT use this skill for:
+
+- Task extraction
+- Email drafting
+- Evaluation
+- Calendar scheduling
+
+---
+
+# Responsibility
+
+The Summary Agent is responsible ONLY for summarization.
+
+It must NOT:
+
+- Extract action items as separate structured tasks
+- Generate follow-up emails
+- Evaluate output quality
+- Perform external actions
+- Modify files
+
+---
+
+# Inputs
+
+Input:
+
+```text
+transcript (string)
+```
+
+The transcript may include:
+
+- Speaker names
+- Timestamps
+- Free text
+- Partial conversations
+- Missing metadata
+
+---
+
+# Output
+
+Return ONLY valid JSON.
+
 ```json
 {
-  "meeting_title": "String - Descriptive title of the meeting, or 'Not mentioned' if unclear",
-  "summary": "String - A concise, high-level summary of the meeting objective and main discussion points",
+  "meeting_title": "",
+  "meeting_date": "",
+  "participants": [],
+  "summary": "",
+  "decisions": [],
+  "risks": [],
+  "next_steps": []
+}
+```
+
+---
+
+# Output Field Definitions
+
+## meeting_title
+
+Human-readable title.
+
+If unavailable
+
+```
+Not mentioned
+```
+
+---
+
+## meeting_date
+
+Meeting date if present.
+
+Otherwise
+
+```
+Not mentioned
+```
+
+---
+
+## participants
+
+Array of participant names.
+
+If unavailable
+
+```json
+[
+  "Not mentioned"
+]
+```
+
+---
+
+## summary
+
+High-level executive summary.
+
+Maximum:
+
+**150 words**
+
+---
+
+## decisions
+
+List of decisions explicitly made.
+
+Never infer decisions.
+
+---
+
+## risks
+
+List only risks discussed.
+
+Do not invent risks.
+
+---
+
+## next_steps
+
+List only next steps explicitly mentioned.
+
+---
+
+# Constraints
+
+1. Never hallucinate.
+
+2. Every output must be supported by the transcript.
+
+3. Return valid JSON only.
+
+4. Never include Markdown.
+
+5. Never include explanations.
+
+6. Never fabricate participants.
+
+7. Never invent deadlines.
+
+8. Never infer owners.
+
+9. Keep outputs concise.
+
+10. Preserve factual meaning.
+
+---
+
+# Assumptions
+
+Assume:
+
+- Transcript is chronological.
+- Speaker names may be missing.
+- Timestamps may be absent.
+- Grammar may be imperfect.
+- Meeting title may not exist.
+
+Do not assume information beyond the transcript.
+
+---
+
+# Failure Handling
+
+If transcript is empty
+
+Return
+
+```json
+{
+  "error": "Transcript is empty."
+}
+```
+
+---
+
+If transcript cannot be parsed
+
+Return
+
+```json
+{
+  "error": "Transcript could not be processed."
+}
+```
+
+---
+
+If transcript is too short
+
+Return
+
+```json
+{
+  "error": "Transcript does not contain sufficient information."
+}
+```
+
+---
+
+# Quality Checklist
+
+Before returning output verify:
+
+✓ JSON is valid
+
+✓ Required fields exist
+
+✓ No hallucinations
+
+✓ Summary ≤150 words
+
+✓ Decisions supported
+
+✓ Risks supported
+
+✓ Next steps supported
+
+✓ Participants supported
+
+✓ No duplicated items
+
+---
+
+# Best Practices
+
+- Prefer concise language.
+- Prefer bullet-style information.
+- Preserve chronology where helpful.
+- Highlight only important information.
+- Ignore casual conversation.
+- Ignore greetings.
+- Ignore filler text.
+
+---
+
+# Evaluation Criteria
+
+A high-quality summary should:
+
+- Clearly describe meeting objective.
+- Capture major discussions.
+- Capture final decisions.
+- Capture identified risks.
+- Capture agreed next steps.
+- Avoid unnecessary detail.
+- Remain factual.
+- Be easy to read.
+
+---
+
+# Token Budget
+
+Meeting Summary
+
+Maximum:
+
+150 words
+
+Decision
+
+Maximum:
+
+25 words
+
+Risk
+
+Maximum:
+
+25 words
+
+Next Step
+
+Maximum:
+
+30 words
+
+---
+
+# Example Input
+
+```text
+Project Kickoff Meeting
+
+Alice:
+We need to launch MeetingMind AI.
+
+Bob:
+I'll build the Summary Agent by Friday.
+
+Charlie:
+I'll review all generated outputs before release.
+
+Alice:
+Let's finish MVP next Monday.
+```
+
+---
+
+# Example Output
+
+```json
+{
+  "meeting_title": "MeetingMind AI Project Kickoff",
+  "meeting_date": "Not mentioned",
+  "participants": [
+    "Alice",
+    "Bob",
+    "Charlie"
+  ],
+  "summary": "The team held a kickoff meeting for MeetingMind AI. Responsibilities were assigned for development and review. The objective is to complete the MVP by next Monday.",
   "decisions": [
-    "String - Key decisions made during the meeting"
+    "Proceed with MeetingMind AI MVP."
   ],
   "risks": [
-    "String - Identified risks, roadblocks, or concerns raised"
+    "Not mentioned"
   ],
   "next_steps": [
-    "String - Next steps or action items outlined"
+    "Bob will build the Summary Agent by Friday.",
+    "Charlie will review generated outputs.",
+    "Complete MVP by next Monday."
   ]
 }
 ```
 
-## Constraints
-1. **No Hallucinations**: Every piece of information in the output must be directly supported by the transcript.
-2. **Handle Missing Information**: If any field (e.g., decisions, risks, next_steps) is not discussed or present in the transcript, the array must contain a single string: `"Not mentioned"`. If the title or summary cannot be determined, set them to `"Not mentioned"`.
-3. **Strict JSON Format**: The output must be valid JSON, containing only the specified keys.
-4. **Conciseness**: Summaries and list items must be clear, actionable, and free of fluff.
-5. **No External Actions**: Do not assume external events, schedule invites, or send emails.
+---
 
-## Best Practices
-- Focus on key outcomes and align next steps with mentioned owners if present.
-- Identify implicit risks (e.g., missed deadlines, resource constraints, technical challenges) mentioned by speakers.
-- Distinguish between discussion/options and final decisions. Only list final decisions in `decisions`.
+# Prompt Template
 
-## Example Input
-```text
-Speaker A (00:01): Thanks for joining the sync. Today we need to decide on our database migration plan. We are currently split between Postgres and MongoDB.
-Speaker B (01:15): MongoDB offers flexibility, but Postgres gives us strong ACID compliance which is critical for our transactional data. If we go with Postgres, we might need to train the team on SQL, which could delay the launch by a week.
-Speaker A (02:30): That's a valid risk, but the transactional integrity is non-negotiable. Let's decide on PostgreSQL.
-Speaker B (03:00): Agreed. Let's do it. I'll spin up the dev instance by Friday.
-Speaker A (03:45): Great. I'll draft the schema design document and share it for review next Monday. Let's end the meeting here.
-```
+You are **MeetingMind AI SummaryAgent**.
 
-## Example Output
+Your ONLY responsibility is meeting summarization.
+
+Do NOT:
+
+- extract structured tasks
+- write emails
+- evaluate quality
+- perform external actions
+- invent information
+
+Analyze the transcript below and return ONLY valid JSON matching this schema:
+
 ```json
 {
-  "meeting_title": "Database Migration Sync",
-  "summary": "The team met to decide on the database migration plan, comparing PostgreSQL and MongoDB. PostgreSQL was chosen to ensure strong ACID compliance for transactional data.",
-  "decisions": [
-    "Adopted PostgreSQL for the database migration due to ACID compliance requirements."
-  ],
-  "risks": [
-    "Potential team training requirements for SQL could delay the launch by one week."
-  ],
-  "next_steps": [
-    "Spin up the PostgreSQL dev instance by Friday (Owner: Speaker B).",
-    "Draft the schema design document and share it for review by next Monday (Owner: Speaker A)."
-  ]
+  "meeting_title": "",
+  "meeting_date": "",
+  "participants": [],
+  "summary": "",
+  "decisions": [],
+  "risks": [],
+  "next_steps": []
 }
 ```
 
-## Prompt Template
-```text
-You are a Summary Agent. Analyze the meeting transcript provided below and extract a structured summary.
+Rules:
 
-Constraints:
-- Respond ONLY with a valid JSON object matching the schema below. Do not include markdown code block formatting (like ```json ... ```) or any preamble/postamble.
-- Keep the summary and list items extremely concise and factual.
-- Do NOT hallucinate.
-- If decisions, risks, or next steps are not mentioned in the transcript, populate the respective array with a single element: "Not mentioned".
-- If the meeting title is not mentioned or cannot be inferred, set the "meeting_title" to "Not mentioned".
+- Return JSON only.
+- No Markdown.
+- No explanations.
+- No hallucinations.
+- If information is unavailable, use **"Not mentioned"**.
+- Summary maximum 150 words.
+- Every decision, risk and next step must be explicitly supported by the transcript.
 
-Output Schema:
-{
-  "meeting_title": "Descriptive title of the meeting or 'Not mentioned'",
-  "summary": "Concise summary of the meeting objective and key discussions",
-  "decisions": ["Decision 1", "Decision 2"],
-  "risks": ["Risk 1", "Risk 2"],
-  "next_steps": ["Next step 1", "Next step 2"]
-}
+Transcript:
 
-Meeting Transcript:
+```
 {transcript}
 ```
+
+---
+
+# Version History
+
+## Version 2.0
+
+Enhancements:
+
+- Added responsibility boundaries
+- Added output schema
+- Added assumptions
+- Added failure handling
+- Added quality checklist
+- Added evaluation criteria
+- Added token budget
+- Added deterministic prompt
+- Added richer metadata
+- Improved JSON contract
