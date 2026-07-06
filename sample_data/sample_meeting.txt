@@ -1,0 +1,22 @@
+Project Kickoff Meeting
+
+Participants:
+Raxit
+Neha
+Jumkhi
+
+Discussion:
+
+The team discussed the launch of MeetingMind AI.
+
+Raxit will prepare the UI by Friday.
+
+Neha will develop the Summary Agent.
+
+Jumkhi will review the generated outputs.
+
+The MVP should be completed by next Monday.
+
+The next review meeting is scheduled for Tuesday.
+
+Meeting ended.
