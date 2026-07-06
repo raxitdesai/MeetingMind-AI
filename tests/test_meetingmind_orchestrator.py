@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 # Ensure src directory is in sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from orchestrator.meetingmind_orchestrator import MeetingMindOrchestrator
+from src.orchestrator.meetingmind_orchestrator import MeetingMindOrchestrator
 
 
 class TestMeetingMindOrchestrator(unittest.TestCase):

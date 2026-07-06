@@ -7,8 +7,8 @@ configures the Gemini client, and holds the AgentRegistry.
 import logging
 from typing import Optional
 from google import genai
-from core.registry import AgentRegistry
-from config import GEMINI_API_KEY, validate_config
+from src.core.registry import AgentRegistry
+from src.config import GEMINI_API_KEY, validate_config
 
 logger = logging.getLogger("meetingmind.app")
 

@@ -18,9 +18,9 @@ if str(src_dir) not in sys.path:
     sys.path.insert(0, str(src_dir))
 
 # Configure logging for the UI component
-from core.logging_config import setup_logging
-from config import validate_config
-from orchestrator.meetingmind_orchestrator import MeetingMindOrchestrator
+from src.core.logging_config import setup_logging
+from src.config import validate_config
+from src.orchestrator.meetingmind_orchestrator import MeetingMindOrchestrator
 
 setup_logging(level=logging.INFO)
 logger = logging.getLogger("meetingmind.ui")

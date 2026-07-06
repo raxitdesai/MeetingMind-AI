@@ -5,9 +5,9 @@ Initializes logging, configuration, and bootstraps the ADK application foundatio
 
 import sys
 import logging
-from config import validate_config
-from core.logging_config import setup_logging
-from core.app import MeetingMindApp
+from src.config import validate_config
+from src.core.logging_config import setup_logging
+from src.core.app import MeetingMindApp
 
 # Configure application logging using the core structured logging configuration
 setup_logging(level=logging.INFO)

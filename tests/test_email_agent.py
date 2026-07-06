@@ -10,7 +10,7 @@ from google.adk.sessions import InMemorySessionService
 # Ensure src directory is in sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from agents.email_agent import EmailAgent
+from src.agents.email_agent import EmailAgent
 
 
 class MockPart:

@@ -10,7 +10,7 @@ from google.adk.sessions import InMemorySessionService
 # Ensure src directory is in sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from agents.summary_agent import SummaryAgent
+from src.agents.summary_agent import SummaryAgent
 
 
 class MockPart:
