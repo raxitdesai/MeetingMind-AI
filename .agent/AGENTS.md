@@ -1,75 +1,491 @@
-# MeetingMind AI - Agent Guidelines & Project Standards
+# MeetingMind AI - AGENTS.md
 
-This document defines the agent architecture, coding standards, and design principles for **MeetingMind AI**, a lightweight multi-agent application built for the Kaggle AI Agents Capstone.
+## Project Purpose
 
----
+MeetingMind AI is a lightweight Multi-Agent AI application developed as
+part of the **Kaggle AI Agents: Intensive Vibe Coding Capstone
+Project**.
 
-## 1. Project Overview & Architecture
-MeetingMind AI is a Streamlit-based web application that leverages the Google Agent Development Kit (ADK) and Gemini models to process meeting transcripts and generate structured follow-up summaries, task extractions, and draft emails.
+The application demonstrates modern AI Agent Engineering concepts using:
 
-### Agent Workflow
-```mermaid
-graph TD
-    Transcript[Meeting Transcript] --> SummaryAgent[Summary Agent]
-    Transcript --> TaskAgent[Task Extraction Agent]
-    SummaryAgent --> EmailAgent[Email Draft Agent]
-    TaskAgent --> EmailAgent
-    EmailAgent --> ReviewAgent[Reviewer Agent]
-    ReviewAgent --> UserApproval{User Approval}
-    UserApproval -->|Approved| Output[Final Output & Draft]
-    UserApproval -->|Rejected/Edit| EmailAgent
-```
+- Google Agent Development Kit (ADK)
+- Gemini Models
+- Antigravity IDE
+- Model Context Protocol (MCP)
+- Agent Skills
+- Spec-Driven Development (SDD)
+- Security Guardrails
+- Evaluation
 
-### The Four AI Agents
-1. **Summary Agent**: Analyzes transcripts and produces concise, structured meeting summaries highlighting key decisions and context.
-2. **Task Extraction Agent**: Extracts action items, assignees, and deadlines from the transcript.
-3. **Email Draft Agent**: Combines the outputs of the Summary and Task Extraction Agents to draft a comprehensive follow-up email.
-4. **Reviewer Agent**: Critiques and refines the draft email against quality checklist standards (e.g., tone, completeness, formatting).
+The objective is to build a **simple, modular, production-inspired AI
+application** rather than an enterprise-scale solution.
 
----
+------------------------------------------------------------------------
 
-## 2. Core Principles & Coding Standards
+# Project Philosophy
 
-### Spec-Driven Development
-- Define clear interfaces, schemas, and specifications before writing implementation code.
-- Agent prompts and outputs must adhere to structured schemas (e.g., Pydantic models).
+This project intentionally favors:
 
-### Google ADK (Agent Development Kit) & Gemini
-- Use the official Google ADK to instantiate and coordinate agents.
-- Leverage Gemini (`gemini-2.5-flash` or newer) as the core LLM driver.
-- Store the API key securely via the `GEMINI_API_KEY` environment variable.
+- Simplicity
+- Readability
+- Small reusable components
+- Explicit code
+- Easy debugging
+- Clear agent responsibilities
 
-### Reusable Agent Skills
-- Encapsulate distinct tools and capabilities (e.g., filesystem access, text processing) into modular, reusable Agent Skills.
-- Follow the custom skill structure format (`SKILL.md`, supporting python scripts).
+Avoid unnecessary abstraction.
 
-### Filesystem MCP Server Integration
-- Any filesystem interaction (reading transcript files, writing draft outputs) must route through the local Filesystem MCP server tool interfaces where applicable.
+Avoid unnecessary frameworks.
 
-### Humans-in-the-Loop & External Actions
-- **CRITICAL**: Never automatically perform external actions (such as sending emails or committing directory alterations) without explicit human approval.
-- The UI must display a clear "Approve & Copy" or "Approve & Export" step.
+Prefer code that is easy to understand over code that is clever.
 
----
+Every generated component should be easy for a beginner to understand.
 
-## 3. Implementation Guidelines
+------------------------------------------------------------------------
 
-### Python Coding Standards (PEP 8)
-- Keep functions small, single-purpose, and highly readable.
-- Follow PEP 8 style guidelines.
-- Use explicit typing (`typing` module) for function signatures.
-- Write docstrings for all modules, classes, and public functions (Google Style Docstrings).
+# Spec-Driven Development
 
-### Logging & Error Handling
-- Use Python's built-in `logging` module to log agent execution phases, token usage estimates, and tool invocation status.
-- Implement robust exception handling around LLM API calls and MCP tool operations.
+The specification is the single source of truth.
 
-### Testing Recommendations
-- **Unit Tests**: Write unit tests for agent utilities, schemas, and prompt templates using `pytest`.
-- **Mocking**: Mock Gemini API responses and MCP tool calls in test suites to prevent network dependencies and API cost.
-- **Integration Tests**: Verify the end-to-end multi-agent orchestration pipeline with sample meeting transcripts.
+Before writing code:
 
-### Security Guidelines
-- **API Keys**: Never hardcode API keys or credentials. Use `.env` files (git-ignored) or environment variables.
-- **File Access**: Limit the Filesystem MCP scope strictly to the project directory to prevent path traversal or unwanted write operations.
-- **Output Sanitization**: Ensure generated agent outputs are clean and do not execute raw HTML/JS in the Streamlit UI.
+1.  Read the project specification.
+2.  Resolve ambiguities.
+3.  Generate architecture.
+4.  Wait for approval before implementing major changes.
+
+Never invent features that are not present in the specification.
+
+------------------------------------------------------------------------
+
+# Overall Architecture
+
+MeetingMind AI consists of four AI agents and one MCP Tool.
+
+    User
+        │
+        ▼
+    Summary Agent
+        │
+        ▼
+    Task Extraction Agent
+        │
+        ▼
+    Email Draft Agent
+        │
+        ▼
+    Reviewer Agent
+        │
+        ▼
+    Filesystem MCP Tool
+        │
+        ▼
+    Streamlit UI
+
+------------------------------------------------------------------------
+
+# Agent Responsibilities
+
+## Summary Agent
+
+Input
+
+Meeting transcript
+
+Output
+
+Structured meeting summary.
+
+Responsibilities
+
+- Meeting objective
+- Key discussion
+- Decisions
+- Risks
+- Next steps
+
+------------------------------------------------------------------------
+
+## Task Extraction Agent
+
+Input
+
+Meeting transcript
+
+Output
+
+Structured action items.
+
+Responsibilities
+
+- Task
+- Owner
+- Due date
+- Priority
+
+------------------------------------------------------------------------
+
+## Email Draft Agent
+
+Input
+
+Summary
+
+Action Items
+
+Output
+
+Professional follow-up email.
+
+------------------------------------------------------------------------
+
+## Reviewer Agent
+
+Input
+
+Outputs from all agents.
+
+Responsibilities
+
+- Quality evaluation
+- Completeness
+- Missing information
+- Suggestions
+- Confidence score
+
+------------------------------------------------------------------------
+
+# ADK Orchestration Principles
+
+Each agent must have a single responsibility.
+
+Prefer sequential orchestration.
+
+Avoid nested agent loops.
+
+Pass structured outputs between agents.
+
+Each agent should be independently testable.
+
+Avoid hidden side effects.
+
+Do not allow agents to directly modify application state.
+
+------------------------------------------------------------------------
+
+# Output Contracts
+
+## Summary Agent
+
+Returns
+
+    {
+      "meeting_title": "",
+      "summary": "",
+      "decisions": [],
+      "risks": [],
+      "next_steps": []
+    }
+
+------------------------------------------------------------------------
+
+## Task Agent
+
+Returns
+
+    [
+      {
+        "task": "",
+        "owner": "",
+        "deadline": "",
+        "priority": ""
+      }
+    ]
+
+------------------------------------------------------------------------
+
+## Email Agent
+
+Returns
+
+    {
+      "subject": "",
+      "body": ""
+    }
+
+------------------------------------------------------------------------
+
+## Reviewer Agent
+
+Returns
+
+    {
+      "overall_score": 95,
+      "summary_score": 96,
+      "task_score": 92,
+      "email_score": 97,
+      "issues": [],
+      "suggestions": []
+    }
+
+------------------------------------------------------------------------
+
+# MCP Guidelines
+
+Use the Filesystem MCP server.
+
+Filesystem MCP may:
+
+- Read meeting transcripts
+- Save summaries
+- Save action items
+- Save email drafts
+- Read generated outputs
+
+Filesystem MCP must NOT:
+
+- Delete files
+- Access files outside the project
+- Modify operating system files
+- Execute arbitrary commands
+
+------------------------------------------------------------------------
+
+# Agent Skills
+
+Each reusable capability must be implemented as a Skill.
+
+Skills should remain independent of business logic.
+
+Expected skills include:
+
+- Meeting Summarization
+- Task Extraction
+- Email Writing
+- Output Review
+
+Each skill should contain:
+
+- Purpose
+- Trigger
+- Inputs
+- Outputs
+- Constraints
+- Examples
+
+------------------------------------------------------------------------
+
+# Security Guidelines
+
+Never perform external actions automatically.
+
+Always require human approval before:
+
+- Sending emails
+- Exporting data
+- Calling external services
+
+Never expose:
+
+- API keys
+- Environment variables
+- Internal paths
+
+Limit MCP access to the project directory.
+
+Sanitize all generated output before displaying it.
+
+------------------------------------------------------------------------
+
+# Prompt Engineering Guidelines
+
+Prompts should:
+
+- Be deterministic
+- Be concise
+- Produce structured outputs
+- Avoid unnecessary verbosity
+- Minimize hallucinations
+
+Prefer JSON or Pydantic-compatible outputs whenever possible.
+
+Avoid free-form text unless explicitly required.
+
+------------------------------------------------------------------------
+
+# Python Coding Standards
+
+Follow PEP 8.
+
+Use:
+
+- Type hints
+- Google Style Docstrings
+- Small functions
+- Clear variable names
+
+Prefer composition over inheritance.
+
+Avoid functions longer than approximately 40 lines whenever practical.
+
+------------------------------------------------------------------------
+
+# Logging
+
+Log:
+
+- Agent execution
+- Tool invocation
+- Evaluation results
+- Errors
+- User approval events
+
+Do not log:
+
+- API keys
+- Secrets
+- Personal information
+
+------------------------------------------------------------------------
+
+# Error Handling
+
+Handle failures gracefully.
+
+Catch:
+
+- Gemini API failures
+- MCP failures
+- Missing files
+- Invalid transcripts
+
+Return meaningful error messages.
+
+------------------------------------------------------------------------
+
+# Evaluation Principles
+
+Reviewer Agent evaluates:
+
+- Summary completeness
+- Missing action items
+- Missing owners
+- Missing deadlines
+- Email quality
+- Consistency between outputs
+
+Return:
+
+- Overall score
+- Individual scores
+- Suggestions
+- Confidence level
+
+------------------------------------------------------------------------
+
+# Testing Guidelines
+
+Write:
+
+- Unit Tests
+- Integration Tests
+- End-to-End Tests
+
+Mock:
+
+- Gemini API
+- MCP calls
+
+Every agent should have at least one positive and one negative test
+case.
+
+------------------------------------------------------------------------
+
+# Naming Conventions
+
+Agent classes
+
+- SummaryAgent
+- TaskAgent
+- EmailAgent
+- ReviewerAgent
+
+Skill folders
+
+- summarize
+- extract_tasks
+- email_writer
+- reviewer
+
+Use descriptive names throughout the project.
+
+------------------------------------------------------------------------
+
+# Documentation Standards
+
+Every module should include:
+
+- Purpose
+- Inputs
+- Outputs
+- Dependencies
+
+Maintain:
+
+- README
+- Architecture Diagram
+- Project Specification
+
+Keep documentation synchronized with implementation.
+
+------------------------------------------------------------------------
+
+# Out of Scope
+
+Do NOT add:
+
+- Authentication
+- Database
+- Cloud Deployment
+- Gmail Integration
+- Calendar Integration
+- Slack Integration
+- Voice Transcription
+- RAG
+- Vector Database
+- Multi-user Support
+- Background Workers
+
+This project intentionally remains simple.
+
+------------------------------------------------------------------------
+
+# Development Workflow
+
+Follow this sequence:
+
+1.  Read Specification
+2.  Review Requirements
+3.  Generate Small Components
+4.  Review Code
+5.  Run Tests
+6.  Commit Changes
+
+Never generate the entire application in one step.
+
+------------------------------------------------------------------------
+
+# Review Checklist
+
+Before completing any feature verify:
+
+- Specification followed
+- Small readable code
+- Structured outputs
+- Security respected
+- Human approval preserved
+- Logging added
+- Tests updated
+- Documentation updated
+
+If unsure, stop and ask for clarification instead of making assumptions.
