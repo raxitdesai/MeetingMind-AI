@@ -3,3 +3,7 @@ streamlit
 google-genai
 python-dotenv
 mcp
+
+pytest
+pytest-mock
+pytest-asyncio

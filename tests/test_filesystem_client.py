@@ -23,7 +23,7 @@ class MockContentBlock:
 
 
 # To import from src, we import absolute mcp package's filesystem_client
-from mcp.filesystem_client import FilesystemMCPClient
+from src.mcp.filesystem_client import FilesystemMCPClient
 
 
 def test_read_transcript_success() -> None:
