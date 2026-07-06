@@ -8,10 +8,10 @@ import logging
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Setup initial logging
+# Setup initial logger
 logger = logging.getLogger("meetingmind.config")
 
-# Determine base directory
+# Determine base directory (MeetingMind-AI root)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
@@ -20,10 +20,14 @@ if env_path.exists():
     load_dotenv(dotenv_path=env_path)
     logger.info("Loaded environment variables from %s", env_path)
 else:
-    logger.warning(".env file not found at %s. Relying on system environment variables.", env_path)
+    logger.warning(
+        ".env file not found at %s. Relying on system environment variables.",
+        env_path
+    )
 
 # Configuration values
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 def validate_config() -> bool:
     """Validates that all required configuration variables are set.

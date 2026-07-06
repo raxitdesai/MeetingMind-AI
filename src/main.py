@@ -1,32 +1,34 @@
-"""Main entry point for MeetingMind AI skeleton.
+"""Main entry point for MeetingMind AI.
 
-Initializes logging, loads config, and demonstrates successful system bootstrap.
+Initializes logging, configuration, and bootstraps the ADK application foundation.
 """
 
 import sys
 import logging
 from config import validate_config
+from core.logging_config import setup_logging
+from core.app import MeetingMindApp
 
-# Configure application logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-
+# Configure application logging using the core structured logging configuration
+setup_logging(level=logging.INFO)
 logger = logging.getLogger("meetingmind.main")
 
 def main() -> None:
-    """Bootstraps the application skeleton and validates settings."""
-    logger.info("Initializing MeetingMind AI Skeleton...")
-    
+    """Bootstraps the application and validates configuration settings."""
+    logger.info("Initializing MeetingMind AI Foundation...")
+
     if not validate_config():
         logger.error("Configuration validation failed. Exiting.")
         sys.exit(1)
-        
-    logger.info("MeetingMind AI Skeleton successfully initialized and validated.")
+
+    try:
+        # Initialize and bootstrap the application wrapper
+        app = MeetingMindApp()
+        app.bootstrap()
+        logger.info("MeetingMind AI ADK Foundation successfully bootstrapped.")
+    except Exception as e:
+        logger.critical("Failed to bootstrap the application: %s", e)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
