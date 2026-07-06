@@ -8,10 +8,10 @@ It supports dependency injection for agent instances to facilitate mocking durin
 import logging
 from typing import Optional, Dict, Any, Union
 
-from agents.summary_agent import SummaryAgent
-from agents.task_agent import TaskAgent
-from agents.email_agent import EmailAgent
-from agents.reviewer_agent import ReviewerAgent
+from src.agents.summary_agent import SummaryAgent
+from src.agents.task_agent import TaskAgent
+from src.agents.email_agent import EmailAgent
+from src.agents.reviewer_agent import ReviewerAgent
 
 logger = logging.getLogger("meetingmind.orchestrator")
 
