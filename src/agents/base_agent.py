@@ -4,9 +4,12 @@ This module provides the BaseAgent class, wrapping the Google ADK Agent,
 and including utility methods to load prompt instructions from skill definitions.
 """
 
+import asyncio
+import json
 import logging
-from typing import Optional
-from google.adk import Agent
+from typing import Optional, Dict, Any
+from google.adk import Agent, Runner
+from google.adk.sessions import InMemorySessionService
 from config import BASE_DIR
 
 logger = logging.getLogger("meetingmind.agents.base")
@@ -80,3 +83,79 @@ class BaseAgent:
             instruction=self.instruction
         )
         logger.info("ADK Agent '%s' initialized successfully.", self.name)
+
+    def _execute(
+        self,
+        prompt: str,
+        session_service: Optional[InMemorySessionService] = None
+    ) -> Dict[str, Any]:
+        """Executes the agent task using Google ADK and processes the response.
+
+        Args:
+            prompt: The prompt to run.
+            session_service: Optional session service.
+
+        Returns:
+            Dict[str, Any]: Parsed JSON response or error dictionary.
+        """
+        logger.info("Executing agent task with prompt: %s", prompt)
+        try:
+            if self.adk_agent is None:
+                self.initialize_adk_agent()
+
+            s_service = session_service or getattr(self, "session_service", None) or InMemorySessionService()
+
+            runner = Runner(
+                agent=self.adk_agent,
+                app_name="meetingmind_app",
+                session_service=s_service
+            )
+
+            # Invoke the agent asynchronously and wait for the results
+            logger.info("Invoking Gemini via ADK runner...")
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+            if loop.is_running():
+                events = loop.run_until_complete(runner.run_debug(prompt))
+            else:
+                events = asyncio.run(runner.run_debug(prompt))
+
+            logger.info("Successfully received response events from Gemini.")
+
+            # Extract final response content
+            response_text = "".join([
+                part.text
+                for event in events
+                if event.content and event.content.parts
+                for part in event.content.parts
+                if part.text
+            ]).strip()
+
+            if not response_text:
+                logger.error("Empty response received from ADK runner.")
+                return {"error": "Transcript could not be processed."}
+
+            # Remove markdown code block formatting if returned by model
+            if response_text.startswith("```json"):
+                response_text = response_text[7:]
+            elif response_text.startswith("```"):
+                response_text = response_text[3:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+
+            # Parse JSON
+            data: Dict[str, Any] = json.loads(response_text)
+            logger.info("Successfully parsed JSON response.")
+            return data
+
+        except json.JSONDecodeError as je:
+            logger.error("Failed to parse response as JSON: %s. Response content: %s", je, response_text)
+            return {"error": "Transcript could not be processed."}
+        except Exception as e:
+            logger.error("Error occurred during agent execution: %s", e, exc_info=True)
+            return {"error": "Transcript could not be processed."}
